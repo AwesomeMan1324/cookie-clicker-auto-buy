@@ -134,32 +134,36 @@
 }
 
     function createGUI() {
-        if (document.getElementById("autoBuySettingsContainer")) return;
+    if (document.getElementById("autoBuySettingsContainer")) return;
 
-        const container = document.createElement("div");
-        container.id = "autoBuySettingsContainer";
-        container.innerHTML = `
-            <div style="padding: 10px; background: rgba(0, 0, 0, 0.8); color: white; border: 1px solid white; margin-top: 10px;">
-                <h3>Auto-Buy Settings</h3>
-                <label>Interval (ms):</label>
-                <input type="number" id="autoBuyInterval" value="1000">
-                <br>
-                <label>Hotkey:</label>
-                <input type="text" id="autoBuyHotkey" value="F9">
-                <br>
-                <button id="saveAutoBuySettings">Save Settings</button>
-            </div>
-        `;
+    const container = document.createElement("div");
+    container.id = "autoBuySettingsContainer";
 
-        document.getElementById("menu").appendChild(container);
+    // Load settings or set defaults
+    const savedSettings = JSON.parse(localStorage.getItem("autoBuySettings"));
+    const defaultSettings = { interval: 1000, hotkey: "F9" };
+    const settings = savedSettings || defaultSettings;
 
-        document.getElementById("saveAutoBuySettings").addEventListener("click", () => {
-            saveSettings();
-            alert("Settings saved!");
-        });
+    container.innerHTML = `
+        <div style="padding: 10px; background: rgba(0, 0, 0, 0.8); color: white; border: 1px solid white; margin-top: 10px;">
+            <h3>Auto-Buy Settings</h3>
+            <label>Interval (ms):</label>
+            <input type="number" id="autoBuyInterval" value="${settings.interval}">
+            <br>
+            <label>Hotkey:</label>
+            <input type="text" id="autoBuyHotkey" value="${settings.hotkey}">
+            <br>
+            <button id="saveAutoBuySettings">Save Settings</button>
+        </div>
+    `;
 
-        loadSettings();
-    }
+    document.getElementById("menu").appendChild(container);
+
+    document.getElementById("saveAutoBuySettings").addEventListener("click", () => {
+        saveSettings();
+        alert("Settings saved!");
+    });
+}
 
     document.addEventListener("keydown", (event) => {
         if (event.key.toUpperCase() === getAutoBuyHotkey()) {
