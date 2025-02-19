@@ -106,33 +106,27 @@
     }
 
     function saveSettings() {
-        const intervalInput = document.getElementById("autoBuyInterval");
-        const hotkeyInput = document.getElementById("autoBuyHotkey");
+    const intervalInput = document.getElementById("autoBuyInterval").value;
+    const hotkeyInput = document.getElementById("autoBuyHotkey").value.toUpperCase(); // Always store hotkey in uppercase
 
-        const settings = {
-            interval: intervalInput.value,
-            hotkey: hotkeyInput.value
-        };
+    const settings = {
+        interval: parseInt(intervalInput),
+        hotkey: hotkeyInput
+    };
 
-        localStorage.setItem("autoBuySettings", JSON.stringify(settings));
-        console.log("✅ Settings saved:", settings);
-    }
-
-    function loadSettings() {
-    const settings = JSON.parse(localStorage.getItem("autoBuySettings"));
-
-    if (settings) {
-        document.getElementById("autoBuyInterval").value = settings.interval || 1000;
-        document.getElementById("autoBuyHotkey").value = settings.hotkey || "F9";
-    } else {
-        // Set default values in case there's nothing saved yet
-        document.getElementById("autoBuyInterval").value = 1000;
-        document.getElementById("autoBuyHotkey").value = "F9";
-    }
-
-    console.log("🔄 Settings loaded:", settings);
+    localStorage.setItem("autoBuySettings", JSON.stringify(settings));
+    console.log("✅ Settings saved:", settings);
 }
 
+    function loadSettings() {
+    const savedSettings = JSON.parse(localStorage.getItem("autoBuySettings"));
+
+    if (savedSettings) {
+        document.getElementById("autoBuyInterval").value = savedSettings.interval;
+        document.getElementById("autoBuyHotkey").value = savedSettings.hotkey;
+        console.log("🔄 Settings loaded:", savedSettings);
+    }
+}
 
     function createGUI() {
     if (document.getElementById("autoBuySettingsContainer")) return;
@@ -142,7 +136,7 @@
 
     // Load settings or set defaults
     const savedSettings = JSON.parse(localStorage.getItem("autoBuySettings"));
-    const defaultSettings = { interval: 1000, hotkey: "F9" };
+    const defaultSettings = { interval: 1000, hotkey: "T" }; // Default hotkey is now "T"
     const settings = savedSettings || defaultSettings;
 
     container.innerHTML = `
@@ -162,8 +156,11 @@
 
     document.getElementById("saveAutoBuySettings").addEventListener("click", () => {
         saveSettings();
-        alert("Settings saved!");
+        alert("✅ Settings saved!");
     });
+
+    // Ensure the settings are properly loaded on creation
+    loadSettings();
 }
 
     document.addEventListener("keydown", (event) => {
