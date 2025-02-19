@@ -119,13 +119,19 @@
     }
 
     function loadSettings() {
-        const settings = JSON.parse(localStorage.getItem("autoBuySettings")) || { interval: 1000, hotkey: "F9" };
+    const settings = JSON.parse(localStorage.getItem("autoBuySettings"));
 
-        document.getElementById("autoBuyInterval").value = settings.interval;
-        document.getElementById("autoBuyHotkey").value = settings.hotkey;
-
-        console.log("🔄 Settings loaded:", settings);
+    if (settings) {
+        document.getElementById("autoBuyInterval").value = settings.interval || 1000;
+        document.getElementById("autoBuyHotkey").value = settings.hotkey || "F9";
+    } else {
+        // Set default values in case there's nothing saved yet
+        document.getElementById("autoBuyInterval").value = 1000;
+        document.getElementById("autoBuyHotkey").value = "F9";
     }
+
+    console.log("🔄 Settings loaded:", settings);
+}
 
     function createGUI() {
         if (document.getElementById("autoBuySettingsContainer")) return;
