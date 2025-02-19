@@ -122,16 +122,17 @@
     const settings = JSON.parse(localStorage.getItem("autoBuySettings"));
 
     if (settings) {
-        document.getElementById("autoBuyInterval").value = settings.interval;
-        document.getElementById("autoBuyHotkey").value = settings.hotkey;
+        document.getElementById("autoBuyInterval").value = settings.interval || 1000;
+        document.getElementById("autoBuyHotkey").value = settings.hotkey || "F9";
     } else {
         // Set default values in case there's nothing saved yet
-        document.getElementById("autoBuyInterval").value = 2500;
-        document.getElementById("autoBuyHotkey").value = "A";
+        document.getElementById("autoBuyInterval").value = 1000;
+        document.getElementById("autoBuyHotkey").value = "F9";
     }
 
     console.log("🔄 Settings loaded:", settings);
 }
+
 
     function createGUI() {
     if (document.getElementById("autoBuySettingsContainer")) return;
