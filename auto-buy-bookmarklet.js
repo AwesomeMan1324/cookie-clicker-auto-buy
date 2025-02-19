@@ -13,39 +13,68 @@
     return cheapest;
 }
 
-function getCheapestUpgrade() {
-    let cheapest = null;
+function getCheapestUpgrades() {
+    let cheapestUpgrades = [];
     let cheapestPrice = Infinity;
 
     Game.UpgradesById.forEach(upgrade => {
-        if (upgrade.unlocked && !upgrade.bought && upgrade.basePrice < cheapestPrice) {
-            cheapest = upgrade;
-            cheapestPrice = upgrade.basePrice;
+        if (upgrade.unlocked && !upgrade.bought && upgrade.basePrice <= cheapestPrice) {
+            if (upgrade.basePrice < cheapestPrice) {
+                cheapestUpgrades = [upgrade]; // Reset list if we found a cheaper upgrade
+                cheapestPrice = upgrade.basePrice;
+            } else if (upgrade.basePrice === cheapestPrice) {
+                cheapestUpgrades.push(upgrade); // Add to list if price is the same
+            }
         }
     });
 
-    return cheapest;
+    return cheapestUpgrades;
+}
+
+function getBestUpgrade(upgrades) {
+    let bestUpgrade = null;
+    let bestCpsGain = 0;
+
+    upgrades.forEach(upgrade => {
+        let cpsBefore = Game.cookiesPs;
+        upgrade.buy();
+        let cpsAfter = Game.cookiesPs;
+        upgrade.bought = 0; // Undo purchase for testing
+        let cpsGain = cpsAfter - cpsBefore;
+
+        if (cpsGain > bestCpsGain) {
+            bestCpsGain = cpsGain;
+            bestUpgrade = upgrade;
+        }
+    });
+
+    return bestUpgrade;
 }
 
 function autoBuy() {
     let cheapestBuilding = getCheapestBuilding();
-    let cheapestUpgrade = getCheapestUpgrade();
+    let cheapestUpgrades = getCheapestUpgrades();
 
-    if (!cheapestBuilding || !cheapestUpgrade) {
-        console.log("❌ No valid buildings or upgrades found.");
+    if (!cheapestBuilding) {
+        console.log("❌ No valid buildings found.");
+        return;
+    }
+
+    if (cheapestUpgrades.length === 0) {
+        console.log("❌ No valid upgrades found.");
         return;
     }
 
     console.log(`🏗️ Cheapest Building: ${cheapestBuilding.name} - ${cheapestBuilding.price}`);
-    console.log(`🔼 Cheapest Upgrade: ${cheapestUpgrade.name} - ${cheapestUpgrade.basePrice}`);
+    console.log(`🔼 Possible Cheapest Upgrades:`, cheapestUpgrades.map(u => u.name).join(", "));
 
     let buildingPrice = cheapestBuilding.price;
-    let upgradePrice = cheapestUpgrade.basePrice;
+    let bestUpgrade = getBestUpgrade(cheapestUpgrades);
 
-    if (upgradePrice <= buildingPrice * 2) {
-        if (Game.cookies >= upgradePrice) {
-            cheapestUpgrade.buy();
-            console.log(`✅ Bought upgrade: ${cheapestUpgrade.name}`);
+    if (bestUpgrade && bestUpgrade.basePrice <= buildingPrice * 2) {
+        if (Game.cookies >= bestUpgrade.basePrice) {
+            bestUpgrade.buy();
+            console.log(`✅ Bought upgrade: ${bestUpgrade.name} (Best CPS Gain)`);
         }
     } else {
         if (Game.cookies >= buildingPrice) {
@@ -57,7 +86,6 @@ function autoBuy() {
 
 // Run autoBuy every second (or user-defined interval)
 setInterval(autoBuy, 1000);
-
 
     let purchaseSpeed = 1000;
     let toggleHotkey = "T";
