@@ -21,48 +21,50 @@
     // Load Settings
     function loadSettings() {
         const savedSettings = JSON.parse(localStorage.getItem("autoBuySettings"));
-
         if (savedSettings) {
-            document.getElementById("autoBuyInterval").value = savedSettings.interval;
-            document.getElementById("autoBuyHotkey").value = savedSettings.hotkey;
-            console.log("🔄 Settings loaded:", savedSettings);
+            return savedSettings;
         }
+        return { interval: 1000, hotkey: "T" }; // Default settings
     }
 
     // Create GUI
     function createGUI() {
-        if (document.getElementById("autoBuySettingsContainer")) return;
+        setTimeout(() => {
+            const menu = document.getElementById("menu");
+            if (!menu) {
+                console.error("❌ Error: Options menu not found!");
+                return;
+            }
 
-        const container = document.createElement("div");
-        container.id = "autoBuySettingsContainer";
+            if (document.getElementById("autoBuySettingsContainer")) return;
 
-        // Load settings or set defaults
-        const savedSettings = JSON.parse(localStorage.getItem("autoBuySettings"));
-        const defaultSettings = { interval: 1000, hotkey: "T" }; // Default hotkey is "T"
-        const settings = savedSettings || defaultSettings;
+            const container = document.createElement("div");
+            container.id = "autoBuySettingsContainer";
 
-        container.innerHTML = `
-            <div style="padding: 10px; background: rgba(0, 0, 0, 0.8); color: white; border: 1px solid white; margin-top: 10px;">
-                <h3>Auto-Buy Settings</h3>
-                <label>Interval (ms):</label>
-                <input type="number" id="autoBuyInterval" value="${settings.interval}">
-                <br>
-                <label>Hotkey:</label>
-                <input type="text" id="autoBuyHotkey" value="${settings.hotkey}">
-                <br>
-                <button id="saveAutoBuySettings">Save Settings</button>
-            </div>
-        `;
+            const settings = loadSettings();
 
-        document.getElementById("menu").appendChild(container);
+            container.innerHTML = `
+                <div style="padding: 10px; background: rgba(0, 0, 0, 0.8); color: white; border: 1px solid white; margin-top: 10px;">
+                    <h3>Auto-Buy Settings</h3>
+                    <label>Interval (ms):</label>
+                    <input type="number" id="autoBuyInterval" value="${settings.interval}">
+                    <br>
+                    <label>Hotkey:</label>
+                    <input type="text" id="autoBuyHotkey" value="${settings.hotkey}">
+                    <br>
+                    <button id="saveAutoBuySettings">Save Settings</button>
+                </div>
+            `;
 
-        document.getElementById("saveAutoBuySettings").addEventListener("click", () => {
-            saveSettings();
-            alert("✅ Settings saved!");
-        });
+            menu.appendChild(container);
 
-        // Ensure the settings are properly loaded on creation
-        loadSettings();
+            document.getElementById("saveAutoBuySettings").addEventListener("click", () => {
+                saveSettings();
+                alert("✅ Settings saved!");
+            });
+
+            console.log("✅ Auto-Buy GUI created successfully!");
+        }, 1000); // Small delay to ensure the Options menu is fully loaded
     }
 
     // Auto-Buy Function
@@ -136,7 +138,7 @@
             autoBuyInterval = null;
             console.log("⏹️ Auto-Buy Stopped.");
         } else {
-            let settings = JSON.parse(localStorage.getItem("autoBuySettings")) || { interval: 1000 };
+            let settings = loadSettings();
             autoBuyInterval = setInterval(autoBuy, settings.interval);
             console.log(`▶️ Auto-Buy Started (Interval: ${settings.interval}ms)`);
         }
@@ -144,7 +146,7 @@
 
     // Listen for Hotkey
     document.addEventListener("keydown", (event) => {
-        let settings = JSON.parse(localStorage.getItem("autoBuySettings")) || { hotkey: "T" };
+        let settings = loadSettings();
         if (event.key.toUpperCase() === settings.hotkey) {
             toggleAutoBuy();
         }
